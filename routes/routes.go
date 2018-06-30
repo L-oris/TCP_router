@@ -55,7 +55,7 @@ func About(conn net.Conn) {
 
 	writeResHeaders(conn, "text/html")
 	tpl := template.Must(template.ParseFiles("templates/about.gohtml"))
-	err := tpl.Execute(conn, people.MakePeople())
+	err := tpl.Execute(conn, people.GeneratePeople())
 	utils.HandleTemplateErr(err)
 }
 
