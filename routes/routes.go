@@ -18,6 +18,18 @@ func writeResHeaders(conn net.Conn, contentType string) {
 	io.WriteString(conn, "\r\n")
 }
 
+// StyleSheet css
+func StyleSheet(conn net.Conn) {
+	defer conn.Close()
+
+	f, err := os.Open("assets/style.css")
+	utils.HandleFileErr(err)
+	defer f.Close()
+
+	writeResHeaders(conn, "text/css")
+	io.Copy(conn, f)
+}
+
 // Index page
 func Index(conn net.Conn) {
 	defer conn.Close()
@@ -27,10 +39,11 @@ func Index(conn net.Conn) {
 		<head>
 			<meta charset="utf-8" />
 			<title>Page Title</title>
+			<link rel="stylesheet" href="/style.css">
 		</head>
 		<body>
 			<h1>Holy cow this is low level!</h1>
-			<a href="/about" style="margin: 3em; display: block; font-size: 20px">Go to -> About</a>
+			<a href="/about" class="link">Go to -> About</a>
 			<img src="pics/cow.jpg">
 		</body></html>`
 
@@ -42,12 +55,12 @@ func Index(conn net.Conn) {
 func Cow(conn net.Conn) {
 	defer conn.Close()
 
-	file, err := os.Open("assets/cow.jpg")
+	f, err := os.Open("assets/cow.jpg")
 	utils.HandleFileErr(err)
-	defer file.Close()
+	defer f.Close()
 
 	writeResHeaders(conn, "image/jpeg")
-	io.Copy(conn, file)
+	io.Copy(conn, f)
 }
 
 // About page

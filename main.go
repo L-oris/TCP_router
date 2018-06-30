@@ -56,6 +56,8 @@ func mux(conn net.Conn, reqHeader string) {
 	switch {
 	case reqMethod == "GET" && reqURI == "/":
 		routes.Index(conn)
+	case reqMethod == "GET" && reqURI == "/style.css":
+		routes.StyleSheet(conn)
 	case reqMethod == "GET" && reqURI == "/pics/cow.jpg":
 		routes.Cow(conn)
 	case reqMethod == "GET" && reqURI == "/about":
