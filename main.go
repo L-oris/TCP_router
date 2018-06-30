@@ -62,15 +62,15 @@ func mux(conn net.Conn, reqHeader string) {
 
 	switch {
 	case reqMethod == "GET" && reqURI == "/":
-		handleIndex(conn)
+		index(conn)
 	case reqMethod == "GET" && reqURI == "/pics/cow.jpg":
-		handleCowPic(conn)
+		cow(conn)
 	case reqMethod == "GET" && reqURI == "apply":
-		handleIndex(conn)
+		apply(conn)
 	case reqMethod == "POST" && reqURI == "apply":
-		handleIndex(conn)
+		applyPost(conn)
 	default:
-		handleNotFound(conn)
+		notFound(conn)
 	}
 }
 
@@ -81,7 +81,7 @@ func writeResHeaders(conn net.Conn, contentType string) {
 	io.WriteString(conn, "\r\n")
 }
 
-func handleIndex(conn net.Conn) {
+func index(conn net.Conn) {
 	defer conn.Close()
 
 	body := `
@@ -99,23 +99,36 @@ func handleIndex(conn net.Conn) {
 	io.WriteString(conn, body)
 }
 
-func handleCowPic(conn net.Conn) {
+func cow(conn net.Conn) {
 	defer conn.Close()
+
 	file, err := os.Open("cow.jpg")
-	if err != nil {
-		fmt.Println("Error opening image")
-	}
+	handleFileErr(err)
 	defer file.Close()
 
 	writeResHeaders(conn, "image/jpeg")
 	io.Copy(conn, file)
 }
 
-func handleApplyGet(conn net.Conn)  {}
-func handleApplyPost(conn net.Conn) {}
+func apply(conn net.Conn)     {}
+func applyPost(conn net.Conn) {}
 
-func handleNotFound(conn net.Conn) {
+func notFound(conn net.Conn) {
 	defer conn.Close()
+
 	writeResHeaders(conn, "text/html")
-	tpl.ExecuteTemplate(conn, "notFound.gohtml", nil)
+	err := tpl.ExecuteTemplate(conn, "notFound.gohtml", nil)
+	handleTemplateErr(err)
+}
+
+func handleTemplateErr(err error) {
+	if err != nil {
+		log.Fatalln("error executing template:", err)
+	}
+}
+
+func handleFileErr(err error) {
+	if err != nil {
+		log.Fatalln("error opening file:", err)
+	}
 }
