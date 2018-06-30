@@ -3,27 +3,12 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"html/template"
-	"io"
 	"log"
 	"net"
-	"os"
 	"strings"
+
+	"github.com/L-oris/tcpMux/routes"
 )
-
-type person struct {
-	FirstName string
-	LastName  string
-	Age       int
-}
-
-type people []person
-
-var tpl *template.Template
-
-func init() {
-	tpl = template.Must(template.ParseGlob("templates/*.gohtml"))
-}
 
 func main() {
 	port := ":8080"
@@ -70,91 +55,12 @@ func mux(conn net.Conn, reqHeader string) {
 
 	switch {
 	case reqMethod == "GET" && reqURI == "/":
-		index(conn)
+		routes.Index(conn)
 	case reqMethod == "GET" && reqURI == "/pics/cow.jpg":
-		cow(conn)
+		routes.Cow(conn)
 	case reqMethod == "GET" && reqURI == "/about":
-		about(conn)
+		routes.About(conn)
 	default:
-		notFound(conn)
-	}
-}
-
-func writeResHeaders(conn net.Conn, contentType string) {
-	io.WriteString(conn, "HTTP/1.1 200 OK\r\n")
-	fmt.Fprint(conn, "Content-Type:", contentType, "\r\n")
-	io.WriteString(conn, "MyHeader: Loris\r\n")
-	io.WriteString(conn, "\r\n")
-}
-
-func index(conn net.Conn) {
-	defer conn.Close()
-
-	body := `
-		<!DOCTYPE html>
-		<head>
-			<meta charset="utf-8" />
-			<title>Page Title</title>
-		</head>
-		<body>
-			<h1>Holy cow this is low level!</h1>
-			<img src="pics/cow.jpg">
-		</body></html>`
-
-	writeResHeaders(conn, "text/html")
-	io.WriteString(conn, body)
-}
-
-func cow(conn net.Conn) {
-	defer conn.Close()
-
-	file, err := os.Open("cow.jpg")
-	handleFileErr(err)
-	defer file.Close()
-
-	writeResHeaders(conn, "image/jpeg")
-	io.Copy(conn, file)
-}
-
-func about(conn net.Conn) {
-	defer conn.Close()
-
-	writeResHeaders(conn, "text/html")
-	err := tpl.ExecuteTemplate(conn, "about.gohtml", makePeople())
-	handleTemplateErr(err)
-}
-
-func notFound(conn net.Conn) {
-	defer conn.Close()
-
-	writeResHeaders(conn, "text/html")
-	err := tpl.ExecuteTemplate(conn, "notFound.gohtml", nil)
-	handleTemplateErr(err)
-}
-
-func makePeople() people {
-	loris := person{
-		FirstName: "Loris",
-		LastName:  "Guerra",
-		Age:       26,
-	}
-	antonio := person{
-		FirstName: "Antonio",
-		LastName:  "Antonini",
-		Age:       30,
-	}
-
-	return people{loris, antonio}
-}
-
-func handleTemplateErr(err error) {
-	if err != nil {
-		log.Fatalln("error executing template:", err)
-	}
-}
-
-func handleFileErr(err error) {
-	if err != nil {
-		log.Fatalln("error opening file:", err)
+		routes.NotFound(conn)
 	}
 }
