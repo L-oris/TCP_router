@@ -30,6 +30,7 @@ func Index(conn net.Conn) {
 		</head>
 		<body>
 			<h1>Holy cow this is low level!</h1>
+			<a href="/about" style="margin: 3em; display: block; font-size: 20px">Go to -> About</a>
 			<img src="pics/cow.jpg">
 		</body></html>`
 
