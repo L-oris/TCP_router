@@ -11,6 +11,14 @@ import (
 	"strings"
 )
 
+type person struct {
+	FirstName string
+	LastName  string
+	Age       int
+}
+
+type people []person
+
 var tpl *template.Template
 
 func init() {
@@ -65,10 +73,8 @@ func mux(conn net.Conn, reqHeader string) {
 		index(conn)
 	case reqMethod == "GET" && reqURI == "/pics/cow.jpg":
 		cow(conn)
-	case reqMethod == "GET" && reqURI == "apply":
-		apply(conn)
-	case reqMethod == "POST" && reqURI == "apply":
-		applyPost(conn)
+	case reqMethod == "GET" && reqURI == "/about":
+		about(conn)
 	default:
 		notFound(conn)
 	}
@@ -110,8 +116,13 @@ func cow(conn net.Conn) {
 	io.Copy(conn, file)
 }
 
-func apply(conn net.Conn)     {}
-func applyPost(conn net.Conn) {}
+func about(conn net.Conn) {
+	defer conn.Close()
+
+	writeResHeaders(conn, "text/html")
+	err := tpl.ExecuteTemplate(conn, "about.gohtml", makePeople())
+	handleTemplateErr(err)
+}
 
 func notFound(conn net.Conn) {
 	defer conn.Close()
@@ -119,6 +130,21 @@ func notFound(conn net.Conn) {
 	writeResHeaders(conn, "text/html")
 	err := tpl.ExecuteTemplate(conn, "notFound.gohtml", nil)
 	handleTemplateErr(err)
+}
+
+func makePeople() people {
+	loris := person{
+		FirstName: "Loris",
+		LastName:  "Guerra",
+		Age:       26,
+	}
+	antonio := person{
+		FirstName: "Antonio",
+		LastName:  "Antonini",
+		Age:       30,
+	}
+
+	return people{loris, antonio}
 }
 
 func handleTemplateErr(err error) {

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Apply</title>
+</head>
+
+<body>
+    <h2>Here we are!</h2>
+
+    {{range .}}
+        <ul>
+            <li>First Name -> {{.FirstName}}
+            <li>Last Name -> {{.LastName}}
+            <li>Age -> {{.Age}} 
+        </ul>
+    {{end}}
+
+</body>
+
+</html>
